@@ -17,7 +17,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
   */
     VectorXd rmse(4);
 	rmse << 0,0,0,0;
-  if (estimations.size() == 0 || estimations.size() != groundTruth.size()) {
+  if (estimations.size() == 0 || estimations.size() != ground_truth.size()) {
 	  cout << "Invalid estimation or ground_truth data" << endl;
 	  return rmse;
   }
@@ -43,8 +43,6 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
     std::cout << "RMSE: " << rmse << std::endl;
 	
 	return rmse;
-	
-  
 }
 
     float Tools::CalculateNISPerformance(const std::vector<double> &nis_values, MeasurementPackage::SensorType sensorType) {
@@ -62,4 +60,4 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
 
         return (nis_over_95/(float)nis_values.size());
     }
-}
+

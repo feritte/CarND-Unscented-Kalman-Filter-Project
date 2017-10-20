@@ -37,8 +37,12 @@ int main()
   Tools tools;
   vector<VectorXd> estimations;
   vector<VectorXd> ground_truth;
+    
+  // added to compute the nis values
+  vector<double> radar_nis_values;
+  vector<double> lidar_nis_values;
 
-  h.onMessage([&ukf,&tools,&estimations,&ground_truth](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&ukf,&tools,&estimations,&ground_truth, &radar_nis_values,&lidar_nis_values](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -126,8 +130,26 @@ int main()
     	  estimate(3) = v2;
     	  
     	  estimations.push_back(estimate);
+    	  
+    	  if (sensor_type.compare("L") == 0) 
+    	  {
+    	  double nisLaser = ukf.NIS_laser_;
+    	  lidar_nis_values.push_back(nisLaser);
+    	  cout << "NIS Laser = " << nisLaser<< endl << endl;
+    	  } 
+    	  else if (sensor_type.compare("R") == 0) 
+    	  {
+    	  double nisRadar = ukf.NIS_radar_;
+    	  radar_nis_values.push_back(nisRadar);
+    	  cout << "NIS Radar = " << nisRadar << endl << endl;
+    	  }
 
     	  VectorXd RMSE = tools.CalculateRMSE(estimations, ground_truth);
+    	  
+    	  float nis_radar_perc = tools.CalculateNISPerformance(radar_nis_values, MeasurementPackage::RADAR)*100;
+    	  float nis_lidar_perc = tools.CalculateNISPerformance(lidar_nis_values, MeasurementPackage::LASER)*100;
+    	  cout << "NIS Radar percentage : " << nis_radar_perc << '%' << endl;
+    	  cout << "NIS Lidar percantage : " << nis_lidar_perc << '%' << endl;    	  
 
           json msgJson;
           msgJson["estimate_x"] = p_x;
