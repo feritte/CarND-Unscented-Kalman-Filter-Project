@@ -47,7 +47,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
   
 }
 
-    float CalculateNISPerformance(const std::vector<float> &nis_values, MeasurementPackage::SensorType sensorType) {
+    float Tools::CalculateNISPerformance(const std::vector<double> &nis_values, MeasurementPackage::SensorType sensorType) {
         const float nis_radar_95 = 7.815; // 95% percent of the case should be less than this
         const float nis_lidar_95 = 5.991;
 
