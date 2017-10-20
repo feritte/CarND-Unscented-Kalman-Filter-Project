@@ -67,12 +67,10 @@ UKF::UKF() {
   weights_ = VectorXd(2*n_aug_+1);
     ///* predicted sigma points matrix
   Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
+  NIS_laser_ = 0.f;
+  NIS_radar_ = 0.f;
 
-  Xsig_aug_ = MatrixXd(n_aug_, 2 * n_aug_ + 1);
 
-  x_aug_ = VectorXd(n_aug_);
-
-  P_aug_ = MatrixXd(n_aug_, n_aug_);
 
 
 }
@@ -199,7 +197,7 @@ void UKF::Prediction(double delta_t) {
   P_aug(6,6) = std_yawdd_*std_yawdd_;
   
   //square root matrix
-  MatrixXd L = P_aug_.llt().matrixL();
+  MatrixXd L = P_aug.llt().matrixL();
   //create augmented sigma points
   Xsig_aug.col(0)  = x_aug;  
   for (int i = 0; i< n_aug_; i++)
@@ -208,7 +206,7 @@ void UKF::Prediction(double delta_t) {
     Xsig_aug.col(i+1+n_aug_) = x_aug - sqrt(lambda_+n_aug_) * L.col(i);
   }
    //predict sigma points
-  for (int i = 0; i< 2*n_aug+1; i++)
+  for (int i = 0; i< 2*n_aug_+1; i++)
   {
     //extract values for better readability
     double p_x = Xsig_aug(0,i);
@@ -252,11 +250,11 @@ void UKF::Prediction(double delta_t) {
     Xsig_pred_(4,i) = yawd_p;
   }
   // set weights
-  double weight_0 = lambda/(lambda+n_aug);
-  weights(0) = weight_0;
-  for (int i=1; i<2*n_aug+1; i++) {  //2n+1 weights
-    double weight = 0.5/(n_aug+lambda);
-    weights(i) = weight;
+  double weight_0 = lambda_/(lambda_+n_aug);
+  weights_(0) = weight_0;
+  for (int i=1; i<2*n_aug_+1; i++) {  //2n+1 weights
+    double weight = 0.5/(n_aug_+lambda);
+    weights_(i) = weight;
   }  
    //predicted state mean
   x_.fill(0.0);
@@ -365,7 +363,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
  P_ = P_ - K*S*K.transpose();
  
   //calculate NIS
-  double NIS_laser_ = z_diff.transpose() * S.inverse() * z_diff;
+  NIS_laser_ = z_diff.transpose() * S.inverse() * z_diff;
   
   
 }
@@ -473,5 +471,5 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   P_ = P_ - K*S*K.transpose();
 
   // Calculating Radar NIS
-  double NIS_radar_ = z_diff.transpose() * S.inverse() * z_diff;  
+  NIS_radar_ = z_diff.transpose() * S.inverse() * z_diff;  
 }
